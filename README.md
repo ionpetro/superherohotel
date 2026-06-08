@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Superhero® Startup Directory
 
-## Getting Started
+A startup directory for the Superhero® / Frontier Tower ecosystem, built with
+Next.js 16 (App Router) and Supabase. Browse the companies being built in the
+community, open a full profile for each, and submit your own startup.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Directory** (`/`) — searchable, filterable list of startups with a YC-style
+  facet sidebar (Top Companies, Is Hiring, Industry, Batch) and client-side
+  instant filtering + sorting.
+- **Startup profile** (`/startups/[slug]`) — full company page with description,
+  founder card, and a details sidebar (founded, batch, team size, status,
+  location, links).
+- **Submit a startup** (`/submit`) — a Server Action–backed form. Submissions
+  are written straight to Supabase and appear in the directory immediately.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js 16 (App Router, Server Components, Server Actions)
+- Supabase (Postgres + Row Level Security) via `@supabase/ssr`
+- Tailwind CSS v4 with a custom warm-cream Superhero palette
+- Fonts: Geist (sans) + Fraunces (display serif)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+1. Install dependencies:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   pnpm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Environment variables — `.env.local` (already configured):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+   ```
 
-## Deploy on Vercel
+3. Create the database — run [`supabase/schema.sql`](./supabase/schema.sql)
+   once in the Supabase **SQL Editor**. It creates the `superhero_startups`
+   table, RLS policies, indexes, and seed data (idempotent).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Run the dev server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   pnpm dev
+   ```
+
+## Database
+
+Single table: `public.superhero_startups`. RLS:
+
+- **Read** — anyone can read rows where `approved = true`.
+- **Insert** — anyone can submit a startup (forced `approved = true` so it shows
+  immediately). There is intentionally **no** public `update`/`delete` policy.
+
+The app only ever uses the publishable (anon) key — no service-role key is used
+anywhere, so it is safe on the server.
