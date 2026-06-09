@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStartupBySlug } from "@/lib/startups";
-import { STATUS_LABELS, STATUS_DOT } from "@/lib/format";
+import { STATUS_LABELS, STATUS_DOT, externalHref, socialHref } from "@/lib/format";
 import { SiteNav } from "@/app/components/SiteNav";
 import { SiteFooter } from "@/app/components/SiteFooter";
 import { LogoAvatar } from "@/app/components/LogoAvatar";
@@ -94,7 +94,7 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                 </span>
                 {startup.website && (
                   <a
-                    href={startup.website}
+                    href={externalHref(startup.website) ?? startup.website}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-[14px] text-accent hover:underline"
@@ -149,7 +149,7 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                               </h3>
                               {f.twitter_url && (
                                 <a
-                                  href={f.twitter_url}
+                                  href={socialHref(f.twitter_url, "twitter") ?? f.twitter_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   aria-label={`${f.name} on X`}
@@ -160,7 +160,7 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                               )}
                               {f.linkedin_url && (
                                 <a
-                                  href={f.linkedin_url}
+                                  href={socialHref(f.linkedin_url, "linkedin") ?? f.linkedin_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   aria-label={`${f.name} on LinkedIn`}
@@ -236,12 +236,18 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                     </SocialLink>
                   )}
                   {startup.linkedin_url && (
-                    <SocialLink href={startup.linkedin_url} label="LinkedIn">
+                    <SocialLink
+                      href={socialHref(startup.linkedin_url, "linkedin") ?? startup.linkedin_url}
+                      label="LinkedIn"
+                    >
                       <span className="text-[13px] font-bold">in</span>
                     </SocialLink>
                   )}
                   {startup.twitter_url && (
-                    <SocialLink href={startup.twitter_url} label="X">
+                    <SocialLink
+                      href={socialHref(startup.twitter_url, "twitter") ?? startup.twitter_url}
+                      label="X"
+                    >
                       <span className="text-[13px] font-bold">𝕏</span>
                     </SocialLink>
                   )}
@@ -284,7 +290,7 @@ function SocialLink({
 }) {
   return (
     <a
-      href={href}
+      href={externalHref(href) ?? href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
