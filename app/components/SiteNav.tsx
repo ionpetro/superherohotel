@@ -4,13 +4,15 @@ export function SiteNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-cream/85 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-cream font-display text-lg font-semibold leading-none">
-            S
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight">
-            Superhero<sup className="text-[9px] top-[-0.6em]">®</sup>
-          </span>
+        <Link href="/" className="flex items-center group" aria-label="Superhero home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/superhero-logo.svg"
+            alt="Superhero"
+            className="h-7 w-auto"
+            width={170}
+            height={28}
+          />
         </Link>
 
         <div className="hidden items-center gap-7 text-[14px] text-ink-soft sm:flex">
