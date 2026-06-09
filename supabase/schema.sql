@@ -122,11 +122,11 @@ create policy "startup_logos_public_select"
 -- Seed data (only inserts if the table is empty)
 -- ----------------------------------------------------------------------------
 insert into public.superhero_startups
-  (slug, name, tagline, description, website, batch, status, industry, tags, founded_year, is_hiring, is_top, submitter_email)
+  (slug, name, tagline, description, website, status, industry, tags, founded_year, is_hiring, is_top, submitter_email)
 select * from (values
 ('gamerplug', 'Gamerplug', 'Find your people to game with.',
  'Gamerplug helps gamers find teammates and friends who actually match — by game, skill level, platform, and schedule. Build a profile, get matched, and squad up across the titles you play instead of grinding solo with random fills.',
- 'https://gamerplug.app', 'Spring 2026', 'active', 'Consumer',
+ 'https://gamerplug.app', 'active', 'Consumer',
  array['Consumer','Gaming','Social'], 2024, true, true,
  'support@gamerplug.app')
 ) as seed

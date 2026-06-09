@@ -65,11 +65,6 @@ export function SubmitForm() {
             placeholder="Hardware"
             hint="Primary category."
           />
-          <Field
-            label="Batch / cohort"
-            name="batch"
-            placeholder="Spring 2026"
-          />
           <SelectField
             label="Status"
             name="status"

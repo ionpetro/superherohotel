@@ -118,7 +118,6 @@ export async function createStartup(
     logo_url: str(formData, "logo_url") || null,
     website: website || null,
     location: str(formData, "location") || null,
-    batch: str(formData, "batch") || null,
     status: VALID_STATUSES.has(statusRaw) ? statusRaw : "active",
     industry: str(formData, "industry") || null,
     tags,

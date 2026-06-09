@@ -206,7 +206,6 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                   {startup.founded_year && (
                     <Row label="Founded" value={String(startup.founded_year)} />
                   )}
-                  {startup.batch && <Row label="Batch" value={startup.batch} />}
                   {startup.team_size && (
                     <Row label="Team Size" value={String(startup.team_size)} />
                   )}
