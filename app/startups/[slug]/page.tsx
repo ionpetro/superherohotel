@@ -123,40 +123,65 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                 </div>
               )}
 
-              {/* Founder */}
-              {startup.founder_name && (
+              {/* Founders */}
+              {startup.founders.length > 0 && (
                 <div className="mt-12">
                   <h2 className="text-2xl font-semibold tracking-tight text-ink">
-                    {startup.team_size && startup.team_size > 1
-                      ? "Active Founders"
-                      : "Founder"}
+                    {startup.founders.length > 1 ? "Active Founders" : "Founder"}
                   </h2>
-                  <div className="mt-5 rounded-2xl border border-line bg-surface p-6">
-                    <div className="flex items-start gap-4">
-                      <LogoAvatar
-                        name={startup.founder_name}
-                        logoUrl={startup.founder_image_url}
-                        size={56}
-                        rounded="rounded-full"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-[17px] font-semibold text-ink">
-                            {startup.founder_name}
-                          </h3>
+                  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {startup.founders.map((f) => (
+                      <div
+                        key={f.id}
+                        className="rounded-2xl border border-line bg-surface p-6"
+                      >
+                        <div className="flex items-start gap-4">
+                          <LogoAvatar
+                            name={f.name}
+                            logoUrl={f.image_url}
+                            size={56}
+                            rounded="rounded-full"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-[17px] font-semibold text-ink">
+                                {f.name}
+                              </h3>
+                              {f.twitter_url && (
+                                <a
+                                  href={f.twitter_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${f.name} on X`}
+                                  className="text-ink-soft hover:text-ink"
+                                >
+                                  <span className="text-[13px] font-bold">𝕏</span>
+                                </a>
+                              )}
+                              {f.linkedin_url && (
+                                <a
+                                  href={f.linkedin_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${f.name} on LinkedIn`}
+                                  className="text-ink-soft hover:text-ink"
+                                >
+                                  <span className="text-[13px] font-bold">in</span>
+                                </a>
+                              )}
+                            </div>
+                            {f.role && (
+                              <p className="text-[13px] text-muted">{f.role}</p>
+                            )}
+                            {f.bio && (
+                              <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">
+                                {f.bio}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        {startup.founder_role && (
-                          <p className="text-[13px] text-muted">
-                            {startup.founder_role}
-                          </p>
-                        )}
-                        {startup.founder_bio && (
-                          <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">
-                            {startup.founder_bio}
-                          </p>
-                        )}
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               )}

@@ -57,6 +57,45 @@ create policy "superhero_startups_insert_public"
   with check (approved = true);
 
 -- ----------------------------------------------------------------------------
+-- Founders (one-to-many; a startup can have several founders)
+-- ----------------------------------------------------------------------------
+create table if not exists public.superhero_startup_founders (
+  id uuid primary key default gen_random_uuid(),
+  startup_id uuid not null references public.superhero_startups(id) on delete cascade,
+  name text not null,
+  role text,
+  bio text,
+  image_url text,
+  linkedin_url text,
+  twitter_url text,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists superhero_founders_startup_idx
+  on public.superhero_startup_founders (startup_id, sort_order);
+
+alter table public.superhero_startup_founders enable row level security;
+
+drop policy if exists "superhero_founders_select" on public.superhero_startup_founders;
+create policy "superhero_founders_select"
+  on public.superhero_startup_founders for select
+  to anon, authenticated
+  using (exists (
+    select 1 from public.superhero_startups s
+    where s.id = startup_id and s.approved = true
+  ));
+
+drop policy if exists "superhero_founders_insert" on public.superhero_startup_founders;
+create policy "superhero_founders_insert"
+  on public.superhero_startup_founders for insert
+  to anon, authenticated
+  with check (exists (
+    select 1 from public.superhero_startups s
+    where s.id = startup_id and s.approved = true
+  ));
+
+-- ----------------------------------------------------------------------------
 -- Storage: public bucket for uploaded startup logos
 -- ----------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -83,13 +122,22 @@ create policy "startup_logos_public_select"
 -- Seed data (only inserts if the table is empty)
 -- ----------------------------------------------------------------------------
 insert into public.superhero_startups
-  (slug, name, tagline, description, website, batch, status, industry, tags, founded_year, is_hiring, is_top, linkedin_url, twitter_url, founder_name, founder_role, founder_bio, submitter_email)
+  (slug, name, tagline, description, website, batch, status, industry, tags, founded_year, is_hiring, is_top, submitter_email)
 select * from (values
 ('gamerplug', 'Gamerplug', 'Find your people to game with.',
  'Gamerplug helps gamers find teammates and friends who actually match — by game, skill level, platform, and schedule. Build a profile, get matched, and squad up across the titles you play instead of grinding solo with random fills.',
  'https://gamerplug.app', 'Spring 2026', 'active', 'Consumer',
- array['Consumer','Gaming','Social'], 2024, true, true, 'https://linkedin.com', 'https://x.com',
- 'Stephan, Ion, Abed & Hunter', 'Founders', 'Building the easiest way for gamers to find the right people to play with.',
+ array['Consumer','Gaming','Social'], 2024, true, true,
  'support@gamerplug.app')
 ) as seed
 where not exists (select 1 from public.superhero_startups);
+
+-- Gamerplug founders
+insert into public.superhero_startup_founders (startup_id, name, role, sort_order)
+select s.id, f.name, 'Co-founder', f.ord
+from public.superhero_startups s,
+  (values ('Stephan', 0), ('Ion', 1), ('Abed', 2), ('Hunter', 3)) as f(name, ord)
+where s.slug = 'gamerplug'
+  and not exists (
+    select 1 from public.superhero_startup_founders ff where ff.startup_id = s.id
+  );

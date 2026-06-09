@@ -2,6 +2,18 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 
 export const STARTUPS_TABLE = "superhero_startups";
+export const FOUNDERS_TABLE = "superhero_startup_founders";
+
+export type Founder = {
+  id: string;
+  name: string;
+  role: string | null;
+  bio: string | null;
+  image_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  sort_order: number;
+};
 
 export type Startup = {
   id: string;
@@ -29,6 +41,8 @@ export type Startup = {
   created_at: string;
 };
 
+export type StartupWithFounders = Startup & { founders: Founder[] };
+
 const COLUMNS =
   "id, slug, name, tagline, description, logo_url, website, location, batch, status, industry, tags, team_size, founded_year, is_hiring, is_top, linkedin_url, twitter_url, founder_name, founder_role, founder_bio, founder_image_url, created_at";
 
@@ -54,7 +68,9 @@ export async function getAllStartups(): Promise<Startup[]> {
   return (data ?? []) as Startup[];
 }
 
-export async function getStartupBySlug(slug: string): Promise<Startup | null> {
+export async function getStartupBySlug(
+  slug: string,
+): Promise<StartupWithFounders | null> {
   const supabase = await getSupabase();
   const { data, error } = await supabase
     .from(STARTUPS_TABLE)
@@ -67,5 +83,37 @@ export async function getStartupBySlug(slug: string): Promise<Startup | null> {
     console.error("Failed to load startup:", error.message);
     return null;
   }
-  return (data as Startup) ?? null;
+  if (!data) return null;
+
+  const startup = data as Startup;
+
+  const { data: founderRows, error: foundersError } = await supabase
+    .from(FOUNDERS_TABLE)
+    .select("id, name, role, bio, image_url, linkedin_url, twitter_url, sort_order")
+    .eq("startup_id", startup.id)
+    .order("sort_order", { ascending: true });
+
+  if (foundersError) {
+    console.error("Failed to load founders:", foundersError.message);
+  }
+
+  let founders = (founderRows ?? []) as Founder[];
+
+  // Fall back to the legacy single-founder fields if no founder rows exist.
+  if (founders.length === 0 && startup.founder_name) {
+    founders = [
+      {
+        id: "legacy",
+        name: startup.founder_name,
+        role: startup.founder_role,
+        bio: startup.founder_bio,
+        image_url: startup.founder_image_url,
+        linkedin_url: startup.linkedin_url,
+        twitter_url: startup.twitter_url,
+        sort_order: 0,
+      },
+    ];
+  }
+
+  return { ...startup, founders };
 }

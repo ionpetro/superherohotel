@@ -4,7 +4,42 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { STARTUPS_TABLE } from "@/lib/startups";
+import { STARTUPS_TABLE, FOUNDERS_TABLE } from "@/lib/startups";
+
+type FounderInput = {
+  name: string;
+  role: string;
+  bio: string;
+  linkedin_url: string;
+  twitter_url: string;
+};
+
+function parseFounders(formData: FormData): FounderInput[] {
+  const raw = (formData.get("founders_json") as string | null) ?? "";
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .map((f) => {
+      const o = (f ?? {}) as Record<string, unknown>;
+      const s = (k: string) =>
+        typeof o[k] === "string" ? (o[k] as string).trim().slice(0, 280) : "";
+      return {
+        name: s("name").slice(0, 80),
+        role: s("role").slice(0, 80),
+        bio: s("bio"),
+        linkedin_url: s("linkedin_url"),
+        twitter_url: s("twitter_url"),
+      };
+    })
+    .filter((f) => f.name.length > 0)
+    .slice(0, 12);
+}
 
 export type SubmitState = {
   error: string | null;
@@ -99,14 +134,37 @@ export async function createStartup(
     approved: true,
   };
 
-  const { error } = await supabase.from(STARTUPS_TABLE).insert(record);
+  const { data: inserted, error } = await supabase
+    .from(STARTUPS_TABLE)
+    .insert(record)
+    .select("id")
+    .single();
 
-  if (error) {
-    console.error("Insert failed:", error.message);
+  if (error || !inserted) {
+    console.error("Insert failed:", error?.message);
     return {
       error:
         "Something went wrong saving your startup. Please try again in a moment.",
     };
+  }
+
+  const founders = parseFounders(formData);
+  if (founders.length > 0) {
+    const founderRows = founders.map((f, i) => ({
+      startup_id: inserted.id,
+      name: f.name,
+      role: f.role || null,
+      bio: f.bio || null,
+      linkedin_url: f.linkedin_url || null,
+      twitter_url: f.twitter_url || null,
+      sort_order: i,
+    }));
+    const { error: founderError } = await supabase
+      .from(FOUNDERS_TABLE)
+      .insert(founderRows);
+    if (founderError) {
+      console.error("Founder insert failed:", founderError.message);
+    }
   }
 
   revalidatePath("/");

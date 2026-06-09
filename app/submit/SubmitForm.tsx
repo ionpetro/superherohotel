@@ -109,37 +109,11 @@ export function SubmitForm() {
         </label>
       </Section>
 
-      <Section title="Founder" subtitle="Optional, but it makes the page sing.">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field
-            label="Founder name"
-            name="founder_name"
-            placeholder="Marcus Lee"
-          />
-          <Field
-            label="Role"
-            name="founder_role"
-            placeholder="Co-founder / CEO"
-          />
-        </div>
-        <Field
-          label="Founder bio"
-          name="founder_bio"
-          textarea
-          placeholder="A sentence or two about the founder."
-        />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field
-            label="LinkedIn URL"
-            name="linkedin_url"
-            placeholder="https://linkedin.com/company/…"
-          />
-          <Field
-            label="X / Twitter URL"
-            name="twitter_url"
-            placeholder="https://x.com/…"
-          />
-        </div>
+      <Section
+        title="Founders"
+        subtitle="Add one or more — it makes the page sing."
+      >
+        <FoundersField />
       </Section>
 
       <Section
@@ -246,6 +220,161 @@ function Field({
       ) : hint ? (
         <span className="mt-1 block text-[12px] text-muted">{hint}</span>
       ) : null}
+    </label>
+  );
+}
+
+type FounderInput = {
+  name: string;
+  role: string;
+  bio: string;
+  linkedin_url: string;
+  twitter_url: string;
+};
+
+const EMPTY_FOUNDER: FounderInput = {
+  name: "",
+  role: "",
+  bio: "",
+  linkedin_url: "",
+  twitter_url: "",
+};
+
+function FoundersField() {
+  const [founders, setFounders] = useState<FounderInput[]>([
+    { ...EMPTY_FOUNDER },
+  ]);
+
+  function update(i: number, patch: Partial<FounderInput>) {
+    setFounders((list) =>
+      list.map((f, idx) => (idx === i ? { ...f, ...patch } : f)),
+    );
+  }
+
+  const serialized = JSON.stringify(
+    founders
+      .map((f) => ({
+        name: f.name.trim(),
+        role: f.role.trim(),
+        bio: f.bio.trim(),
+        linkedin_url: f.linkedin_url.trim(),
+        twitter_url: f.twitter_url.trim(),
+      }))
+      .filter((f) => f.name.length > 0),
+  );
+
+  return (
+    <div className="space-y-4">
+      {founders.map((f, i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-line bg-cream/40 p-4 sm:p-5"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-ink-soft">
+              Founder {i + 1}
+            </span>
+            {founders.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setFounders((list) => list.filter((_, idx) => idx !== i))
+                }
+                className="text-[13px] text-muted hover:text-accent"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <RawField
+              label="Name"
+              value={f.name}
+              onChange={(v) => update(i, { name: v })}
+              placeholder="Marcus Lee"
+            />
+            <RawField
+              label="Role"
+              value={f.role}
+              onChange={(v) => update(i, { role: v })}
+              placeholder="Co-founder / CEO"
+            />
+          </div>
+          <div className="mt-4">
+            <RawField
+              label="Bio"
+              value={f.bio}
+              onChange={(v) => update(i, { bio: v })}
+              placeholder="A sentence or two about this founder."
+              textarea
+            />
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <RawField
+              label="LinkedIn URL"
+              value={f.linkedin_url}
+              onChange={(v) => update(i, { linkedin_url: v })}
+              placeholder="https://linkedin.com/in/…"
+            />
+            <RawField
+              label="X / Twitter URL"
+              value={f.twitter_url}
+              onChange={(v) => update(i, { twitter_url: v })}
+              placeholder="https://x.com/…"
+            />
+          </div>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={() => setFounders((list) => [...list, { ...EMPTY_FOUNDER }])}
+        className="w-full rounded-lg border border-dashed border-line-strong px-4 py-2.5 text-[13px] font-medium text-ink-soft transition-colors hover:bg-surface-2"
+      >
+        + Add another founder
+      </button>
+
+      <input type="hidden" name="founders_json" value={serialized} />
+    </div>
+  );
+}
+
+function RawField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  textarea,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  textarea?: boolean;
+}) {
+  const base =
+    "w-full rounded-xl border border-line-strong bg-cream/60 px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 transition-shadow";
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+        {label}
+      </span>
+      {textarea ? (
+        <textarea
+          rows={3}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`${base} resize-y`}
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={base}
+        />
+      )}
     </label>
   );
 }
