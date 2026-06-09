@@ -80,6 +80,7 @@ export async function createStartup(
     name,
     tagline,
     description: str(formData, "description") || tagline,
+    logo_url: str(formData, "logo_url") || null,
     website: website || null,
     location: str(formData, "location") || null,
     batch: str(formData, "batch") || null,

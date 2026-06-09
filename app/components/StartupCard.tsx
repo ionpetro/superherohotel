@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Startup } from "@/lib/startups";
 import { LogoAvatar } from "./LogoAvatar";
-import { Pill, BatchPill } from "./Pill";
+import { Pill } from "./Pill";
 
 export function StartupCard({ startup }: { startup: Startup }) {
   return (
@@ -31,7 +31,6 @@ export function StartupCard({ startup }: { startup: Startup }) {
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {startup.batch && <BatchPill batch={startup.batch} />}
           {startup.industry && <Pill>{startup.industry}</Pill>}
           {startup.is_hiring && <Pill variant="outline">Hiring</Pill>}
           {startup.tags.slice(0, 2).map((t) => (

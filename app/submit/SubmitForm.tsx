@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createStartup, type SubmitState } from "./actions";
+import { LogoUploader } from "../components/LogoUploader";
 
 const initialState: SubmitState = { error: null };
 
@@ -10,6 +11,8 @@ export function SubmitForm() {
     createStartup,
     initialState,
   );
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
 
   return (
     <form action={formAction} className="space-y-8">
@@ -20,6 +23,11 @@ export function SubmitForm() {
       )}
 
       <Section title="The basics" subtitle="What everyone sees first.">
+        <LogoUploader
+          value={logoUrl}
+          onChange={setLogoUrl}
+          onUploadingChange={setLogoUploading}
+        />
         <Field
           label="Startup name"
           name="name"
@@ -149,10 +157,14 @@ export function SubmitForm() {
       <div className="flex items-center gap-4 border-t border-line pt-6">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || logoUploading}
           className="rounded-full bg-ink px-6 py-3 text-[15px] font-medium text-cream transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:hover:scale-100"
         >
-          {pending ? "Submitting…" : "Submit to the directory"}
+          {pending
+            ? "Submitting…"
+            : logoUploading
+              ? "Waiting for logo…"
+              : "Submit to the directory"}
         </button>
         <span className="text-[13px] text-muted">
           Your startup appears in the directory immediately.

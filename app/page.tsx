@@ -47,13 +47,6 @@ export default async function Home() {
               </Link>
               .
             </p>
-
-            <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-6 sm:grid-cols-4">
-              <Stat value={`${startups.length}`} label="Startups listed" />
-              <Stat value="$150M+" label="Raised by founders" />
-              <Stat value="700+" label="Community members" />
-              <Stat value="100+" label="Events / month" />
-            </div>
           </div>
         </section>
 
@@ -70,16 +63,5 @@ export default async function Home() {
 
       <SiteFooter />
     </>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-center">
-      <div className="font-display text-3xl font-semibold text-ink sm:text-4xl">
-        {value}
-      </div>
-      <div className="mt-1 text-[13px] text-muted">{label}</div>
-    </div>
   );
 }

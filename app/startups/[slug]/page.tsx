@@ -5,7 +5,7 @@ import { STATUS_LABELS, STATUS_DOT } from "@/lib/format";
 import { SiteNav } from "@/app/components/SiteNav";
 import { SiteFooter } from "@/app/components/SiteFooter";
 import { LogoAvatar } from "@/app/components/LogoAvatar";
-import { Pill, BatchPill } from "@/app/components/Pill";
+import { Pill } from "@/app/components/Pill";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +71,6 @@ export default async function StartupPage(props: PageProps<"/startups/[slug]">) 
                     {startup.tagline}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    {startup.batch && <BatchPill batch={startup.batch} />}
                     <Pill>
                       <span
                         className="h-1.5 w-1.5 rounded-full"
